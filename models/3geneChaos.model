@@ -1,0 +1,94 @@
+this is a model file, used by the model class.
+
+This file is best viewed with tab=12 (or more)blanks.
+any sentence starting with "#" will be seen as the starting block of something it should parse.
+parsing is stopped when it reaches an #END block, so do not put anything in between! 
+any other lines will be completly ignored so feel free to comment and whine as much as you like
+do note however, that all those lovely comments will be gone in any models generated
+if you want to have some notes that should be preserved, there is a special section for that below
+these instructions will always be printed.
+
+#CONSERVED_NOTES
+basic stuff!
+#END
+
+next you can set the options per gene:
+minprod - the default production without regulation, this is independent of any concentrations
+name    - the name used to generate all other names in this file, and the name used in graphs and stuff
+decay   - per time unit concentration*decay
+#PER_GENE_OPTIONS
+minprod	decay	name
+0.1	0.1	gene1
+0.1	0.1	gene2
+0.1	0.1	gene3
+#END
+
+some gene constructs cannot be measured indivually and are measured in one data set or not at all...
+the row positions should be similar to the intial values and data values...
+#GENE_V_DATA_RELATIONS
+gene1	
+gene2	
+gene3		
+#END
+
+simple reactions are reactions that only have 2 genes involved
+they are recognizable by simple arrows in the model: A<->B
+or by its differential equation dA/dt = k2*B (-k1*A)
+the later however can also be a part of a more complex reaction... in that case it should not be in this matrix...
+in doubt always use complex reactions
+
+the position determines which influences which
+ XX  AB
+Y02 A02
+Y00 B00
+should be seen as y=2x ~ dy/dt=2[X] ~ dA/dt = k2*B
+
+the values are the rate constants, that can be negative (= represion).
+a matrix like this is also called a Wagner's gene network model 
+(http://en.wikipedia.org/wiki/Wagner
+#SIMPLE_REACTIONS
+gene1	gene2	gene3	
+0	-0.7	0.3	gene1
+0.4	0	-0.9	gene2
+-0.6	0	0.2	gene3
+#END
+
+some more complex reactions look like:
+A+B=AB
+A+B=C
+A+B=A+C
+A=A+B
+though there are many other possiblities... these are discribed in the matrix bellow
+variables that are not in this reaction get the value 0
+variables on the left side of the equation get a 1
+variables on the right side of the equation get a 2
+variables on both sides of the equation get a 3
+the corresponding rate constants are in the matrix after that...
+#COMPLEX_REACTIONS
+Nr	gene1	gene2	gene3	gene4	gene5	
+#END
+
+the next matrix contains the values and constraints for the reactions descriped above...
+F* = forward reaction (from right to left)
+B* = backward reaction (from left to right)
+#COMPLEX_REACTIONS_VALUES
+Nr	Fval	Fmin	Fmax	Bval	Bmin	Bmax
+#END
+
+Last is the initial data, the amount of colums should be the same as in the data
+
+additional settings:
+sigma - is a function that will be cast over the regulatory part of the dt's, so not the decay
+#SETTINGS
+sigma=@(x)(0.5*((x./sqrt((x.^2)+1))+1));
+%matlab code here....
+this.minDecayParameterRange=0;
+this.maxDecayParameterRange=1;
+this.freeSimpleReactions=1; %maybe this should be in the settings, and not in the actual model...
+#END
+
+#INITIAL_VALUES
+0	0	0	0	0	0	0	0	0	0	0	0	gene1
+0	0.05	0.1	0.2	0.5	1	1	0.5	0.2	0.1	0.05	0	gene2
+1	0.5	0.2	0.1	0.05	0	0	0.05	0.1	0.2	0.5	1	gene3
+#END
